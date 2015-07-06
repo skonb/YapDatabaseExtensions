@@ -46,6 +46,24 @@ extension YapDatabaseReadWriteTransaction {
     public func remove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items) {
         removeAtIndexes(map(items, indexForPersistable))
     }
+    
+    /**
+    Removes any Persistable item.
+    
+    :param: item A Persistable item.
+    */
+    public func remove<Item where Item: Persistable>(item: Item, fromCollection collection: String) {
+        removeAtIndex(indexForPersistable(inCollection: collection)(persistable: item))
+    }
+    
+    /**
+    Removes a sequence of Persistable items.
+    
+    :param: items A sequence of Persistable items.
+    */
+    public func remove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items, fromCollection collection: String) {
+        removeAtIndexes(map(items, indexForPersistable(inCollection: collection)))
+    }
 }
 
 
@@ -85,6 +103,24 @@ extension YapDatabaseConnection {
     :param: items A sequence of Persistable items.
     */
     public func remove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items) {
+        write({ $0.remove(items) })
+    }
+
+    /**
+    Synchonously removes any Persistable item.
+    
+    :param: item A Persistable item.
+    */
+    public func remove<Item where Item: Persistable>(item: Item, fromCollection collection: String) {
+        write({ $0.remove(item) })
+    }
+    
+    /**
+    Synchonously removes a sequence of Persistable items.
+    
+    :param: items A sequence of Persistable items.
+    */
+    public func remove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items, fromCollection collection: String) {
         write({ $0.remove(items) })
     }
 }
@@ -134,6 +170,28 @@ extension YapDatabaseConnection {
     public func asyncRemove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items, queue: dispatch_queue_t = dispatch_get_main_queue(), completion: () -> Void) {
         asyncReadWriteWithBlock({ $0.remove(items) }, completionQueue: queue, completionBlock: completion)
     }
+    
+    /**
+    Synchonously removes any Persistable item.
+    
+    :param: item A Persistable item.
+    :param: queue The dispatch queue to run the completion closure on, defaults to the main queue
+    :param: completion A void closure
+    */
+    public func asyncRemove<Item where Item: Persistable>(item: Item, fromCollection collection: String, queue: dispatch_queue_t = dispatch_get_main_queue(), completion: () -> Void) {
+        asyncReadWriteWithBlock({ $0.remove(item, fromCollection: collection) }, completionQueue: queue, completionBlock: completion)
+    }
+    
+    /**
+    Synchonously removes a sequence of Persistable items.
+    
+    :param: items A sequence of Persistable items.
+    :param: queue The dispatch queue to run the completion closure on, defaults to the main queue
+    :param: completion A void closure
+    */
+    public func asyncRemove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items, fromCollection collection: String, queue: dispatch_queue_t = dispatch_get_main_queue(), completion: () -> Void) {
+        asyncReadWriteWithBlock({ $0.remove(items, fromCollection: collection) }, completionQueue: queue, completionBlock: completion)
+    }
 }
 
 
@@ -174,6 +232,24 @@ extension YapDatabase {
     */
     public func remove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items) {
         return newConnection().remove(items)
+    }
+    
+    /**
+    Synchonously removes any Persistable item.
+    
+    :param: item A Persistable item.
+    */
+    public func remove<Item where Item: Persistable>(item: Item, fromCollection collection: String) {
+        return newConnection().remove(item, fromCollection: collection)
+    }
+    
+    /**
+    Synchonously removes a sequence of Persistable items.
+    
+    :param: items A sequence of Persistable items.
+    */
+    public func remove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items, fromCollection collection: String) {
+        return newConnection().remove(items, fromCollection: collection)
     }
 }
 
@@ -221,6 +297,28 @@ extension YapDatabase {
     */
     public func asyncRemove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items, queue: dispatch_queue_t = dispatch_get_main_queue(), completion: () -> Void) {
         newConnection().asyncRemove(items, queue: queue, completion: completion)
+    }
+    
+    /**
+    Synchonously removes any Persistable item.
+    
+    :param: item A Persistable item.
+    :param: queue The dispatch queue to run the completion closure on, defaults to the main queue
+    :param: completion A void closure
+    */
+    public func asyncRemove<Item where Item: Persistable>(item: Item, fromCollection collection: String, queue: dispatch_queue_t = dispatch_get_main_queue(), completion: () -> Void) {
+        newConnection().asyncRemove(item, fromCollection: collection, queue: queue, completion: completion)
+    }
+    
+    /**
+    Synchonously removes a sequence of Persistable items.
+    
+    :param: items A sequence of Persistable items.
+    :param: queue The dispatch queue to run the completion closure on, defaults to the main queue
+    :param: completion A void closure
+    */
+    public func asyncRemove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items, fromCollection collection: String, queue: dispatch_queue_t = dispatch_get_main_queue(), completion: () -> Void) {
+        newConnection().asyncRemove(items, fromCollection: collection, queue: queue, completion: completion)
     }
 }
 

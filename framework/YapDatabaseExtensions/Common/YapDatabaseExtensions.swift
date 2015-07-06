@@ -202,6 +202,18 @@ public func indexForPersistable<P: Persistable>(persistable: P) -> YapDB.Index {
 }
 
 /**
+A simple function which generates a YapDB.Index from a Persistable
+instance. All write(_:) store objects in the database using this function.
+
+:param: persistable A Persistable type instance
+:param: collection The collection to use
+:returns: A YapDB.Index
+*/
+public func indexForPersistable<P: Persistable>(inCollection collection: String)(persistable: P) -> YapDB.Index {
+    return YapDB.Index(collection: collection, key: keyForPersistable(persistable))
+}
+
+/**
 A generic protocol which extends Persistable. It allows types to
 expose their own metadata object type for use in YapDatabase. 
 The object metadata must conform to NSCoding.
