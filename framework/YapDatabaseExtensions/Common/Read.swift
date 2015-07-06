@@ -224,7 +224,7 @@ extension YapDatabaseReadTransaction {
     :returns: An array of Object types.
     */
     public func readAll<Object where Object: Persistable>(collection: String) -> [Object] {
-        return map(allKeysInCollection(collection) as! [String], read)
+        return map(allKeysInCollection(collection) as! [String], read(inCollection: collection))
     }
     
     /**
@@ -237,7 +237,7 @@ extension YapDatabaseReadTransaction {
     :returns: An array of Value types.
     */
     public func readAll<Value where Value: Saveable, Value: Persistable, Value.ArchiverType.ValueType == Value>(collection: String) -> [Value] {
-        return map(allKeysInCollection(collection) as! [String], read)
+        return map(allKeysInCollection(collection) as! [String], read(inCollection: collection))
     }
 }
 
