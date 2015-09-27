@@ -155,7 +155,7 @@ extension YapDatabaseReadTransaction {
     :param: collection The collection to read
     :returns: An optional Object
     */
-    public func read<Object where Object: Persistable>(inCollection collection: String)(key: String) -> Object? {
+    public func readObject<Object where Object: Persistable>(inCollection collection: String)(key: String) -> Object? {
         return objectForKey(key, inCollection: collection) as? Object
     }
     
@@ -166,8 +166,8 @@ extension YapDatabaseReadTransaction {
     :param: collection The collection to read
     :returns: An optional Value
     */
-    public func read<Value where Value: Saveable, Value: Persistable, Value.ArchiverType.ValueType == Value>(inCollection collection: String)(key: String) -> Value? {
-        return valueFromArchive(objectForKey(key, inCollection: collection))
+    public func readValue<Value where Value: Saveable, Value: Persistable, Value.ArchiverType.ValueType == Value>(inCollection collection: String)(key: String) -> Value? {
+        return Value.ArchiverType.unarchive(objectForKey(key, inCollection: collection))
     }
 }
 
@@ -212,7 +212,7 @@ extension YapDatabaseReadTransaction {
     :returns: An array of Object types.
     */
     public func read<Object where Object: Persistable>(keys: [String], inCollection collection: String) -> [Object] {
-        return map(unique(keys), read(inCollection: collection))
+        return keys.unique().map{readObject(inCollection: collection)(key: $0)!}
     }
     
     /**
@@ -223,7 +223,7 @@ extension YapDatabaseReadTransaction {
     :returns: An array of Value types.
     */
     public func read<Value where Value: Saveable, Value: Persistable, Value.ArchiverType.ValueType == Value>(keys: [String], inCollection collection: String) -> [Value] {
-        return map(unique(keys), read(inCollection: collection))
+        return keys.unique().map{readValue(inCollection: collection)(key: $0)!}
     }
 }
 
@@ -269,7 +269,7 @@ extension YapDatabaseReadTransaction {
     :returns: An array of Object types.
     */
     public func readAll<Object where Object: Persistable>(collection: String) -> [Object] {
-        return map(allKeysInCollection(collection) as! [String], read(inCollection: collection))
+        return (allKeysInCollection(collection) as! [String]).map{readObject(inCollection: collection)(key: $0)!}
     }
     
     /**
@@ -282,7 +282,7 @@ extension YapDatabaseReadTransaction {
     :returns: An array of Value types.
     */
     public func readAll<Value where Value: Saveable, Value: Persistable, Value.ArchiverType.ValueType == Value>(collection: String) -> [Value] {
-        return map(allKeysInCollection(collection) as! [String], read(inCollection: collection))
+        return (allKeysInCollection(collection) as! [String]).map{readValue(inCollection: collection)(key: $0)!}
     }
 }
 
@@ -337,7 +337,7 @@ extension YapDatabaseReadTransaction {
     public func filterExisting<Object where Object: Persistable>(keys: [String], inCollection collection: String) -> ([Object], [String]) {
         let existing: [Object] = read(keys, inCollection: collection)
         let existingKeys = existing.map { indexForPersistable(inCollection: collection)(persistable: $0).key }
-        let missingKeys = filter(keys) { !contains(existingKeys, $0) }
+        let missingKeys = keys.filter { !existingKeys.contains($0) }
         return (existing, missingKeys)
     }
     
@@ -353,7 +353,7 @@ extension YapDatabaseReadTransaction {
     public func filterExisting<Value where Value: Saveable, Value: Persistable, Value.ArchiverType.ValueType == Value>(keys: [String], inCollection collection: String) -> ([Value], [String]) {
         let existing: [Value] = read(keys, inCollection: collection)
         let existingKeys = existing.map { indexForPersistable(inCollection: collection)(persistable: $0).key }
-        let missingKeys = filter(keys) { !contains(existingKeys, $0) }
+        let missingKeys = keys.filter { !existingKeys.contains($0) }
         return (existing, missingKeys)
     }
 }
@@ -570,7 +570,7 @@ extension YapDatabaseConnection {
     :returns: An optional Object
     */
     public func read<Object where Object: Persistable>(inCollection collection: String)(key: String) -> Object? {
-        return read({ $0.read(inCollection: collection)(key: key) })
+        return read({ $0.readObject(inCollection: collection)(key: key) })
     }
     
     /**
@@ -580,7 +580,7 @@ extension YapDatabaseConnection {
     :returns: An optional Value
     */
     public func read<Value where Value: Saveable, Value: Persistable, Value.ArchiverType.ValueType == Value>(inCollection collection: String)(key: String) -> Value? {
-        return read({ $0.read(inCollection: collection)(key: key) })
+        return read({ $0.readValue(inCollection: collection)(key: key) })
     }
 }
 
@@ -622,7 +622,7 @@ extension YapDatabaseConnection {
     :param: completion A closure which receives an optional Object
     */
     public func asyncRead<Object where Object: Persistable>(key: String, inCollection collection: String, queue: dispatch_queue_t = dispatch_get_main_queue(), completion: (Object?) -> Void) {
-        asyncRead({ $0.read(inCollection: collection)(key: key) }, queue: queue, completion: completion)
+        asyncRead({ $0.readObject(inCollection: collection)(key: key) }, queue: queue, completion: completion)
     }
     
     /**
@@ -633,7 +633,7 @@ extension YapDatabaseConnection {
     :param: completion A closure which receives an optional Value
     */
     public func asyncRead<Value where Value: Saveable, Value: Persistable, Value.ArchiverType.ValueType == Value>(key: String,inCollection collection: String, queue: dispatch_queue_t = dispatch_get_main_queue(), completion: (Value?) -> Void) {
-        asyncRead({ $0.read(inCollection: collection)(key: key) }, queue: queue, completion: completion)
+        asyncRead({ $0.readValue(inCollection: collection)(key: key) }, queue: queue, completion: completion)
     }
 }
 

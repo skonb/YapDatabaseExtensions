@@ -62,7 +62,7 @@ extension YapDatabaseReadWriteTransaction {
     :param: items A sequence of Persistable items.
     */
     public func remove<Items where Items: SequenceType, Items.Generator.Element: Persistable>(items: Items, fromCollection collection: String) {
-        removeAtIndexes(map(items, indexForPersistable(inCollection: collection)))
+        removeAtIndexes(items.map{indexForPersistable(inCollection: collection)(persistable: $0)})
     }
 }
 
